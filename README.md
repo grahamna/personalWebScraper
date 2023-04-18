@@ -7,10 +7,10 @@
  May work on expanding this project to include grocery stores to find the best deals.
 
 # Dependencies
- tqdm
- pandas
- requests-html
- datetime
+ tqdm  
+ pandas  
+ requests-html  
+ datetime  
  
 # Usage
  Install the required dependencies using the following command: pip install tqdm pandas requests-html datetime
