@@ -1,3 +1,4 @@
+import sys
 from tqdm import tqdm
 import pandas as pd
 from requests_html import HTMLSession
@@ -34,6 +35,7 @@ def fetchEbay(keyword, page_num_max=1, urlString='https://www.ebay.com/sch/i.htm
             except:
                 subtitle = ''
             price = item.find('span.s-item__price', first=True).text
+            price = price.replace(",", "")
             try:
                 shipping = item.find('span.s-item__shipping.s-item__logisticsCost', first=True).text.replace("shipping", "").replace("Free", "")
                 if (shipping == ' '):
@@ -82,22 +84,25 @@ def quickSearchAndCompare(keyword):
     
 def toDfAndCsvEbay(keyword):
     df = pd.DataFrame(data, columns=['Title', 'Subtitle', 'Price', 'Shipping', 'Final Price', 'Date'])
-    df.to_csv('{keyword}Ebay.csv'.format(keyword=keyword), index=False,mode="a+")
+    df.to_csv('./output/{keyword}Ebay.csv'.format(keyword=keyword), index=False,mode="a+")
     print("Done")
     data.clear()
     
 def toDfAndCsvAmazon(keyword):
     df = pd.DataFrame(data, columns=['Title', 'Rating Count', 'Price', 'Date'])
-    df.to_csv('{keyword}Amazon.csv'.format(keyword=keyword), index=False,mode="a+")
+    df.to_csv('./output/{keyword}Amazon.csv'.format(keyword=keyword), index=False,mode="a+")
     print("Done")
     data.clear()
         
         
-def main(*args):
+def main():
     fetchEbay("ultimate+hacking+keyboard", 1, 'https://www.ebay.com/sch/i.html?_from=R40&_nkw="{keyword}"&_sacat=0&LH_TitleDesc=0&_fsrp=1&_sop=15&_pgn={page_num}')
     fetchAmazon("ultimate+hacking+keyboard", 1, 'https://www.amazon.com/s?k={keyword}&s=exact-aware-popularity-rank&dc&page={page_num}')
     # fetchEbay("graphics+card", 1, 'https://www.ebay.com/sch/i.html?_from=R40&_nkw="{keyword}"&_sacat=0&LH_TitleDesc=0&_fsrp=1&_sop=15&_pgn={page_num}')
-    
+    args = sys.argv[1:]
+    if len(args) != 0:
+        for arg in args:
+            quickSearchAndCompare(args)
     
         
 if __name__ == '__main__':
