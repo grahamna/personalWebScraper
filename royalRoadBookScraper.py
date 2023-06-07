@@ -2,12 +2,9 @@ import sys
 from requests_html import HTMLSession
 
 
-def fetchBook(urlString='https://www.royalroad.com/fiction/36049/the-primal-hunter/chapter/998105/chapter-503-truly-evil-dungeon-design', book=None, session=None):
+def fetchBook(urlString=None, book=None, session=None):
     if urlString is None:
         return book.close()
-
-    if book is None:
-        book = open('book/temp.txt', '+a')
 
     if session is None:
         session = HTMLSession()
@@ -23,30 +20,39 @@ def fetchBook(urlString='https://www.royalroad.com/fiction/36049/the-primal-hunt
             next_link = response.html.find('a.btn-primary', containing='Next', first=True)
             nextUrlString = 'https://www.royalroad.com' + next_link.attrs['href']
 
-        print(nextUrlString)
+        if book is None:
+            title = response.html.find('title', first=True).text
+            book = open(f'book/{title}.txt', 'w')
+
         book.write(text + '\n')
 
+        print(nextUrlString)
+        
         if nextUrlString:
             fetchBook(nextUrlString, book, session)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
+        session.close()
+        if book:
+            book.close()
 
         
 def main():
-    print("only set up for royalroad atm")
+    print("Only set up for Royal Road at the moment.")
     args = sys.argv[1:]
     session = HTMLSession()
 
-    try:
-        if len(args) != 0:
+    if len(args) != 0:
+        try:
             for url in args:
                 fetchBook(url, None, session)
-        else:
-            fetchBook()
+        except:
+            print("An error occurred while processing the URLs.")
+    else:
+        print("You must provide a URL as a CLI argument.\n")
 
-    finally:
-        session.close()
+    session.close()
 
 
 if __name__ == '__main__':
