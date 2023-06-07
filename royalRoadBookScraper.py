@@ -1,4 +1,5 @@
 import sys
+import threading
 from requests_html import HTMLSession
 
 
@@ -6,10 +7,10 @@ def fetchBook(urlString=None, book=None, session=None):
     if urlString is None:
         return book.close()
 
-    if session is None:
-        session = HTMLSession()
-
     try:
+        if session is None:
+            session = HTMLSession()
+
         response = session.get(urlString.strip())
         content = response.html.find('div.chapter-inner', first=True)
         text = content.text
@@ -27,32 +28,39 @@ def fetchBook(urlString=None, book=None, session=None):
         book.write(text + '\n')
 
         print(nextUrlString)
-        
+
         if nextUrlString:
             fetchBook(nextUrlString, book, session)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-        session.close()
         if book:
             book.close()
 
-        
+    finally:
+        if session:
+            session.close()
+
+
 def main():
-    print("Only set up for Royal Road at the moment.")
+    print("only set up for royalroad atm")
     args = sys.argv[1:]
-    session = HTMLSession()
 
-    if len(args) != 0:
-        try:
+    try:
+        if len(args) != 0:
+            threads = []
             for url in args:
-                fetchBook(url, None, session)
-        except:
-            print("An error occurred while processing the URLs.")
-    else:
-        print("You must provide a URL as a CLI argument.\n")
+                t = threading.Thread(target=fetchBook, args=(url, None, None))
+                threads.append(t)
+                t.start()
 
-    session.close()
+            for t in threads:
+                t.join()
+        else:
+            print("You must provide a URL as a CLI Argument \n")
+
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
 
 
 if __name__ == '__main__':
