@@ -86,7 +86,7 @@ def fetchBookFanfiction(urlString=None, book=None, session=None):
 
         if nextUrlString:
             fetchBookFanfiction(nextUrlString, book, session)
-            
+        session.quit()
     except Exception as e:
         print(f"An error occurred: {str(e)}\nTrying Again... hold ctrl C to stop")
         fetchBookFanfiction(tempString, book, None)
