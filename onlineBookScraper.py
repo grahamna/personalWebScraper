@@ -4,6 +4,12 @@ from requests_html import HTMLSession
 
 
 def fetchBook(urlString=None, book=None, session=None):
+    if (str(urlString).find("royalroad.com") != -1):
+        fetchBookRoyalRoad(urlString, book, session)
+    elif (str(urlString).find("fanfiction.net") != -1):
+        print("found fanfiction in url")
+
+def fetchBookRoyalRoad(urlString=None, book=None, session=None):
     if urlString is None:
         return book.close()
 
@@ -30,7 +36,7 @@ def fetchBook(urlString=None, book=None, session=None):
         print(nextUrlString)
 
         if nextUrlString:
-            fetchBook(nextUrlString, book, session)
+            fetchBookRoyalRoad(nextUrlString, book, session)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -43,7 +49,8 @@ def fetchBook(urlString=None, book=None, session=None):
 
 
 def main():
-    print("only set up for royalroad atm")
+    
+    print("only set up for royalroad atm | In Progress")
     args = sys.argv[1:]
 
     try:
