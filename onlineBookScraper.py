@@ -96,7 +96,7 @@ def main():
     
     print("fully set up for royalroad | fanfiction.net is rather buggy ")
     args = sys.argv[1:]
-    args = ['https://www.fanfiction.net/s/11873195/1/I-m-Defying-Gravity', 'https://www.royalroad.com/fiction/51925/a-sith-during-the-fall/chapter/855731/1-not-the-korriban-i-know', 'https://www.royalroad.com/fiction/31514/the-menocht-loop/chapter/903696/the-trials-of-descent-261-ominous-promise', 'https://www.fanfiction.net/s/14205444/1/Enchanting-Melodies'] #for debugging, comment out for actual use
+    #args = ['https://www.fanfiction.net/s/11873195/1/I-m-Defying-Gravity', 'https://www.royalroad.com/fiction/51925/a-sith-during-the-fall/chapter/855731/1-not-the-korriban-i-know', 'https://www.royalroad.com/fiction/31514/the-menocht-loop/chapter/903696/the-trials-of-descent-261-ominous-promise', 'https://www.fanfiction.net/s/14205444/1/Enchanting-Melodies'] #for debugging, comment out for actual use
     try:
         if len(args) != 0:
             threads = []
