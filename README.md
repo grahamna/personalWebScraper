@@ -1,6 +1,6 @@
-# Book Scraper - I'm happy as to where this program is
+# onlineBookScraper
 
-This is a book scraper script that fetches chapters from a website via url and saves them into separate text files.
+This is a book scraper script that fetches chapters from a website via url and saves them into separate text files. I'm happy as to where this program is at for personal use.
 
 ## Description
 
