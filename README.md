@@ -63,6 +63,8 @@ Replace `[URL1]`, `[URL2]`, etc., with the URLs of the book chapters you want to
 
 - **Passing Capchas:** You can manually pass the captcha by changing the uc.Chrome(headless=True, ...) to False, visa versa if uc is able to pass the capcha on it's own. This only applies to fanfiction.net atm.
 
+- **Login Creds:** You can manually enter in login credentials (seen in the fetchBookQQ method, var name is payload). Note, you may need to add more than username and password. Check out the packet sent to login site for format and vars of the creds and whatnot.
+
 ## Disclaimer
 
 Please note that scraping websites may be against the terms of service of some websites. Make sure you have the necessary permissions or rights to scrape content from the target website. Use this script responsibly and in compliance with the website's terms of service.
