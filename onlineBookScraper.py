@@ -8,6 +8,9 @@ import time
 
 
 def fetchBook(urlString=None, book=None, session=None):
+    if urlString is None or urlString == '' or urlString == '\n':
+        print("recieved empty or invalid input")
+        return -1
     if (str(urlString).find("royalroad.com") != -1):
         fetchBookRR(urlString, book, session)
     elif (str(urlString).find("fanfiction.net") != -1):
@@ -22,6 +25,14 @@ def fetchBook(urlString=None, book=None, session=None):
             urlPart = urlString.split('#post')
             urlString = urlPart[0]+ 'reader'
         fetchBookForum(urlString, book, session, 'https://forums.sufficientvelocity.com')
+    elif (str(urlString).find("forum.questionablequesting.com") != -1):
+        if (str(urlString).find("#post") != -1 or str(urlString).find("/reader") == -1):
+            urlPart = urlString.split('#post')
+            urlString = urlPart[0]+ 'reader'
+        fetchBookQQ(urlString, book, session, 'https://forum.questionablequesting.com/')
+    else:
+        print("failed to parse URL")
+    
 
 def fetchBookRR(urlString=None, book=None, session=None):
     if urlString is None:
@@ -150,6 +161,60 @@ def fetchBookForum(urlString=None, book=None, session=None, baseUrl=None):
         if session:
             session.close()
 
+def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None):
+    if urlString is None:
+        return book.close()
+
+    try:
+        if session is None:
+            QQUSERNAME = 'example@mail.com',
+            QQPASSWORD = 'yourPassword'
+            
+            session = HTMLSession()
+            
+            get = session.get('https://forum.questionablequesting.com/login')
+            payload = {
+                'login':QQUSERNAME,
+                'register' : 0,
+                'password':QQPASSWORD,
+                'cookie_check':1,
+                '_xfToken': '',
+                'redirect':'https://forum.questionablequesting.com/'
+                }
+            post = session.post('https://forum.questionablequesting.com/login/login', data = payload)
+
+        response = session.get(urlString.strip())
+        content = response.html.find('article')
+        text = ''.join(block.text for block in content)
+        next = response.html.find('a.text', containing='Next', first=True)
+        if (next is None) :
+            nextUrlString = None
+        else:
+            next_link = next.attrs['href']
+            nextUrlString = baseUrl + next_link
+
+        if book is None:
+            title = response.html.find('title', first=True).text
+            title = title.replace(" ", "")
+            title = title.replace("/", "-")
+            book = open(f'book/{title}.txt', 'w')
+
+        book.write(text + '\n')
+
+        print(nextUrlString)
+
+        if nextUrlString:
+            fetchBookQQ(nextUrlString, book, session, baseUrl)
+
+    except Exception as e:
+        print(f"An error occurred in fetchBookQQ: {str(e)}")
+        if book:
+            book.close()
+
+    finally:
+        if session:
+            session.close()
+
 def input_loop():
         while True:
             url = input("Enter a URL (or 'q' to stop listening): ")
@@ -162,8 +227,8 @@ def main():
     
     print("fully set up for royalroad | fanfiction.net is rather buggy, but works. You can manually pass the captcha by changing the uc.Chrome(headless=True, ...) to False, visa versa | forums. sites, ex. forums.spacebattles.com, forums.sufficientvelocity.com | ")
     args = sys.argv[1:]
-    args = ['https://www.fanfiction.net/s/14227295/1/Os-Marotos-O-Livro-das-Sombras','https://www.fanfiction.net/s/14051246/1/Hermione-s-Trip-to-the-Past-Creating-A-New-Future'] #for debugging, comment out before actual use with CLI
-    print("Debugging Mode! CLI args not being used!") # debug statement
+    # args = ['https://forum.questionablequesting.com/threads/beware-of-chicken-xianxia.13790/reader'] #for debugging, comment out before actual use with CLI
+    # print("Debugging Mode! CLI args not being used!") # debug statement
 
     try:
         if len(args) != 0:
