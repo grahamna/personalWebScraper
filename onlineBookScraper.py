@@ -9,11 +9,21 @@ import time
 
 def fetchBook(urlString=None, book=None, session=None):
     if (str(urlString).find("royalroad.com") != -1):
-        fetchBookRoyalRoad(urlString, book, session)
+        fetchBookRR(urlString, book, session)
     elif (str(urlString).find("fanfiction.net") != -1):
-        fetchBookFanfiction(urlString, book, session)
+        fetchBookFF(urlString, book, session)
+    elif (str(urlString).find("forums.spacebattles.com") != -1):
+        if (str(urlString).find("#post") != -1 or str(urlString).find("/reader") == -1):
+            urlPart = urlString.split('#post')
+            urlString = urlPart[0]+ 'reader'
+        fetchBookForum(urlString, book, session, 'https://forums.spacebattles.com')
+    elif (str(urlString).find("forums.sufficientvelocity.com") != -1):
+        if (str(urlString).find("#post") != -1 or str(urlString).find("/reader") == -1):
+            urlPart = urlString.split('#post')
+            urlString = urlPart[0]+ 'reader'
+        fetchBookForum(urlString, book, session, 'https://forums.sufficientvelocity.com')
 
-def fetchBookRoyalRoad(urlString=None, book=None, session=None):
+def fetchBookRR(urlString=None, book=None, session=None):
     if urlString is None:
         return book.close()
 
@@ -33,6 +43,8 @@ def fetchBookRoyalRoad(urlString=None, book=None, session=None):
 
         if book is None:
             title = response.html.find('title', first=True).text
+            title = title.replace(" ", "")
+            title = title.replace("/", "-")
             book = open(f'book/{title}.txt', 'w')
 
         book.write(text + '\n')
@@ -40,7 +52,7 @@ def fetchBookRoyalRoad(urlString=None, book=None, session=None):
         print(nextUrlString)
 
         if nextUrlString:
-            fetchBookRoyalRoad(nextUrlString, book, session)
+            fetchBookRR(nextUrlString, book, session)
 
     except Exception as e:
         print(f"An error occurred in fetchRoyal: {str(e)}")
@@ -51,15 +63,15 @@ def fetchBookRoyalRoad(urlString=None, book=None, session=None):
         if session:
             session.close()
             
-            
-def fetchBookFanfiction(urlString=None, book=None, session=None):
+def fetchBookFF(urlString=None, book=None, session=None):
     if urlString is None:
         session.quit()
         return book.close()
     tempString = urlString
     try:
         if session is None:
-            session = uc.Chrome(headless=True, use_subprocess=False)
+            session = uc.Chrome(headless=True, use_subprocess=True)
+            session.set_page_load_timeout(15)
             session.get(urlString.strip())
             time.sleep(15)
         else:
@@ -78,6 +90,8 @@ def fetchBookFanfiction(urlString=None, book=None, session=None):
 
         if book is None:
             title = session.title
+            title = title.replace(" ", "")
+            title = title.replace("/", "-")
             book = open(f'book/{title}.txt', 'w')
 
         book.write(text + '\n')
@@ -85,23 +99,76 @@ def fetchBookFanfiction(urlString=None, book=None, session=None):
         print(nextUrlString)
 
         if nextUrlString:
-            fetchBookFanfiction(nextUrlString, book, session)
+            fetchBookFF(nextUrlString, book, session)
         session.quit()
+        
     except Exception as e:
-        print(f"An error occurred: {str(e)}\nTrying Again... hold ctrl C to stop")
-        fetchBookFanfiction(tempString, book, None)
+        print(f"An error occurred: {str(e)}")
+        if session is not None:
+            session.quit()
+            print("session closed for restart")
+        print("Trying Again... press ctrl C to stop")
+        fetchBookFF(tempString, book, None)
 
+def fetchBookForum(urlString=None, book=None, session=None, baseUrl=None):
+    if urlString is None:
+        return book.close()
+
+    try:
+        if session is None:
+            session = HTMLSession()
+
+        response = session.get(urlString.strip())
+        content = response.html.find('div.bbWrapper')
+        text = ''.join(block.text for block in content[1:])
+        next = response.html.find('a.pageNav-jump--next', first=True)
+        if (next is None) :
+            nextUrlString = None
+        else:
+            next_link = next.attrs['href']
+            nextUrlString = baseUrl + next_link
+
+        if book is None:
+            title = response.html.find('title', first=True).text
+            title = title.replace(" ", "")
+            title = title.replace("/", "-")
+            book = open(f'book/{title}.txt', 'w')
+
+        book.write(text + '\n')
+
+        print(nextUrlString)
+
+        if nextUrlString:
+            fetchBookForum(nextUrlString, book, session, baseUrl)
+
+    except Exception as e:
+        print(f"An error occurred in fetchBookForum: {str(e)}")
+        if book:
+            book.close()
+
+    finally:
+        if session:
+            session.close()
+
+def input_loop():
+        while True:
+            url = input("Enter a URL (or 'q' to stop listening): ")
+            if url.lower() == "q":
+                break
+            t = threading.Thread(target=fetchBook, args=(url, None, None))
+            t.start()
 
 def main():
     
-    print("fully set up for royalroad | fanfiction.net is rather buggy ")
+    print("fully set up for royalroad | fanfiction.net is rather buggy, but works. You can manually pass the captcha by changing the uc.Chrome(headless=True, ...) to False, visa versa | forums. sites, ex. forums.spacebattles.com, forums.sufficientvelocity.com | ")
     args = sys.argv[1:]
-    #args = ['https://www.fanfiction.net/s/11873195/1/I-m-Defying-Gravity', 'https://www.royalroad.com/fiction/51925/a-sith-during-the-fall/chapter/855731/1-not-the-korriban-i-know', 'https://www.royalroad.com/fiction/31514/the-menocht-loop/chapter/903696/the-trials-of-descent-261-ominous-promise', 'https://www.fanfiction.net/s/14205444/1/Enchanting-Melodies'] #for debugging, comment out for actual use
+    args = ['https://www.fanfiction.net/s/14227295/1/Os-Marotos-O-Livro-das-Sombras','https://www.fanfiction.net/s/14051246/1/Hermione-s-Trip-to-the-Past-Creating-A-New-Future'] #for debugging, comment out before actual use with CLI
+    print("Debugging Mode! CLI args not being used!") # debug statement
+
     try:
         if len(args) != 0:
             threads = []
             for url in args:
-                print(url)
                 t = threading.Thread(target=fetchBook, args=(url, None, None))
                 threads.append(t)
                 t.start()
@@ -109,7 +176,10 @@ def main():
             for t in threads:
                 t.join()
         else:
-            print("You must provide a URL as a CLI Argument \n")
+            print("No CLI args detected")
+            input_thread = threading.Thread(target=input_loop)
+            input_thread.start()
+            input_thread.join()
 
     except Exception as e:
         print(f"An error occurred in main: {str(e)}")
