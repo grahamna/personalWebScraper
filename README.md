@@ -61,6 +61,8 @@ Replace `[URL1]`, `[URL2]`, etc., with the URLs of the book chapters you want to
 
 - **Adding Urls:** You can add new URLs while the program is running by entering them when prompted. To stop the program, enter 'q' when prompted for a new URL. This can only be done when running the program without CLI args.
 
+- **Passing Capchas:** You can manually pass the captcha by changing the uc.Chrome(headless=True, ...) to False, visa versa if uc is able to pass the capcha on it's own. This only applies to fanfiction.net atm.
+
 ## Disclaimer
 
 Please note that scraping websites may be against the terms of service of some websites. Make sure you have the necessary permissions or rights to scrape content from the target website. Use this script responsibly and in compliance with the website's terms of service.
