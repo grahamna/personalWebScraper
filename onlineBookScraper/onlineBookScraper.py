@@ -9,29 +9,31 @@ import time
 
 def fetchBook(urlString=None, book=None, session=None):
     if urlString is None or urlString == '' or urlString == '\n':
-        print("recieved empty or invalid input")
+        print("received empty or invalid input")
         return -1
     if (str(urlString).find("royalroad.com") != -1):
-        fetchBookRR(urlString, book, session)
+        return fetchBookRR(urlString, book, session) 
     elif (str(urlString).find("fanfiction.net") != -1):
         fetchBookFF(urlString, book, session)
+        return 1
     elif (str(urlString).find("forums.spacebattles.com") != -1):
         if (str(urlString).find("#post") != -1 or str(urlString).find("/reader") == -1):
             urlPart = urlString.split('#post')
             urlString = urlPart[0]+ 'reader'
-        fetchBookForum(urlString, book, session, 'https://forums.spacebattles.com')
+        return fetchBookForum(urlString, book, session, 'https://forums.spacebattles.com')
     elif (str(urlString).find("forums.sufficientvelocity.com") != -1):
         if (str(urlString).find("#post") != -1 or str(urlString).find("/reader") == -1):
             urlPart = urlString.split('#post')
             urlString = urlPart[0]+ 'reader'
-        fetchBookForum(urlString, book, session, 'https://forums.sufficientvelocity.com')
+        return fetchBookForum(urlString, book, session, 'https://forums.sufficientvelocity.com')
     elif (str(urlString).find("forum.questionablequesting.com") != -1):
         if (str(urlString).find("#post") != -1 or str(urlString).find("/reader") == -1):
             urlPart = urlString.split('#post')
             urlString = urlPart[0]+ 'reader'
-        fetchBookQQ(urlString, book, session, 'https://forum.questionablequesting.com/')
+        return fetchBookQQ(urlString, book, session, 'https://forum.questionablequesting.com/')
     else:
         print("failed to parse URL")
+        return -1
     
 
 def fetchBookRR(urlString=None, book=None, session=None):
@@ -69,10 +71,12 @@ def fetchBookRR(urlString=None, book=None, session=None):
         print(f"An error occurred in fetchRoyal: {str(e)}")
         if book:
             book.close()
+        return -1
 
     finally:
         if session:
             session.close()
+        return 1
             
 def fetchBookFF(urlString=None, book=None, session=None):
     if urlString is None:
@@ -156,24 +160,22 @@ def fetchBookForum(urlString=None, book=None, session=None, baseUrl=None):
         print(f"An error occurred in fetchBookForum: {str(e)}")
         if book:
             book.close()
+        return -1
 
     finally:
         if session:
             session.close()
+        return 1
 
-def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None):
+def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None, auth=None):
     if urlString is None:
         return book.close()
 
     try:
-        if session is None:
-            QQUSERNAME = 'example@mail.com',
+        if auth is None:
+            QQUSERNAME = 'example.mail.com',
             QQPASSWORD = 'yourPassword'
-            
-            session = HTMLSession()
-            
-            get = session.get('https://forum.questionablequesting.com/login')
-            payload = {
+            auth = {
                 'login':QQUSERNAME,
                 'register' : 0,
                 'password':QQPASSWORD,
@@ -181,6 +183,11 @@ def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None):
                 '_xfToken': '',
                 'redirect':'https://forum.questionablequesting.com/'
                 }
+        if session is None:
+            
+            session = HTMLSession()
+            payload = auth
+            get = session.get('https://forum.questionablequesting.com/login')
             post = session.post('https://forum.questionablequesting.com/login/login', data = payload)
 
         response = session.get(urlString.strip())
@@ -210,10 +217,12 @@ def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None):
         print(f"An error occurred in fetchBookQQ: {str(e)}")
         if book:
             book.close()
+        return -1
 
     finally:
         if session:
             session.close()
+        return 1
 
 def input_loop():
         while True:
@@ -225,7 +234,7 @@ def input_loop():
 
 def main():
     
-    print("fully set up for royalroad | fanfiction.net is rather buggy, but works. You can manually pass the captcha by changing the uc.Chrome(headless=True, ...) to False, visa versa | forums. sites, ex. forums.spacebattles.com, forums.sufficientvelocity.com | ")
+    print("fully set up for royalroad | fanfiction.net is rather buggy, but works. You can manually pass the captcha by changing the uc.Chrome(headless=True, ...) to False, visa versa | forums. sites, ex. forums.spacebattles.com, forums.sufficientvelocity.com | works for sites where you've got login creds and how they're formatted")
     args = sys.argv[1:]
     # args = ['https://forum.questionablequesting.com/threads/beware-of-chicken-xianxia.13790/reader'] #for debugging, comment out before actual use with CLI
     # print("Debugging Mode! CLI args not being used!") # debug statement
