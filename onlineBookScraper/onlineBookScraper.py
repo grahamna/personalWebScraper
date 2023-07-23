@@ -89,28 +89,30 @@ def fetchBookFF(urlString=None, book=None, session=None):
     tempString = urlString
     try:
         if session is None:
-            session = uc.Chrome(headless=False)
-            i = random.random()
-            k = random.randint(1,2) + i*1.22
+            options = uc.ChromeOptions()
+            options.add_argument('--disable-extensions')
+            options.add_argument("--auto-open-devtools-for-tabs")
+            options.add_argument('--disable-gpu')
+            options.add_argument("--incognito")
+            options.add_argument("--disable-plugins-discovery")
+            options.add_argument("--start-maximized")
+            options.add_argument('--no-sandbox')
+            session = uc.Chrome(headless=True, options=options)
+            session.delete_all_cookies()
             session.set_page_load_timeout(15)
-            wait = WebDriverWait(session, 150)
+            wait = WebDriverWait(session, 15)
             session.get(urlString.strip())
-            wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'iframe')))
-            time.sleep(1.502 + k)
-            session.switch_to.frame(session.find_element(By.CSS_SELECTOR, 'iframe'))
-            time.sleep(.732 + k)
-            session.find_element(By.CSS_SELECTOR, 'input').click()
-            session.switch_to.default_content()
-            time.sleep(4.232 + k)
+            time.sleep(5.153)
+            # solveCaptcha(session, wait)
+            wait = WebDriverWait(session, 15)
         else:
             session.set_page_load_timeout(15)
             wait = WebDriverWait(session, 15)
             session.get(urlString.strip())
-            time.sleep(1.05) # counter rate-limiting detection
-            
+
         wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.storytext')))
         response = HTML(html=session.page_source)
-        
+        time.sleep(1.095)
         content = response.find('div.storytext', first=True)
         text = content.text
         next = response.find('button.btn', containing="Next", first=True)
@@ -124,7 +126,7 @@ def fetchBookFF(urlString=None, book=None, session=None):
             title = session.title
             title = title.replace(" ", "")
             title = title.replace("/", "_")
-            book = open(f'onlineBookScraper/book/{title}.txt', 'w')
+            book = open(f'book/{title}.txt', 'w')
 
         book.write(text + '\n')
 
@@ -132,15 +134,23 @@ def fetchBookFF(urlString=None, book=None, session=None):
 
         if nextUrlString:
             fetchBookFF(nextUrlString, book, session)
+        session.close()
         session.quit()
-        
+
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         if session is not None:
-            session.quit()
-            print("session quit attempt")
-        print("Trying Again... press ctrl C to stop")
-        fetchBookFF(tempString, book, None)
+            rand = random.randint(0,1)
+            if (rand == 0):
+                print("assuming captcha")
+                solveCaptcha(session, wait)
+                print("trying again...")
+                fetchBookFF(tempString, book, session)
+            else:
+                print("restarting and trying again...")
+                session.close()
+                session.quit()
+                fetchBookFF(tempString, book, None)
 
 def fetchBookForum(urlString=None, book=None, session=None, baseUrl=None):
     if urlString is None:
@@ -240,6 +250,17 @@ def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None, auth=None
         if session:
             session.close()
         return 1
+
+def solveCaptcha(session, wait):
+    i = random.random()
+    k = random.randint(1,2) + i*1.22
+    wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'iframe')))
+    time.sleep(1.502 + k)
+    session.switch_to.frame(session.find_element(By.CSS_SELECTOR, 'iframe'))
+    time.sleep(.732 + k)
+    session.find_element(By.CSS_SELECTOR, 'input').click()
+    session.switch_to.default_content()
+    time.sleep(4.232 + k)
 
 def input_loop():
         while True:
