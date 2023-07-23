@@ -106,6 +106,7 @@ def fetchBookFF(urlString=None, book=None, session=None):
             session.set_page_load_timeout(15)
             wait = WebDriverWait(session, 15)
             session.get(urlString.strip())
+            time.sleep(1.05) # counter rate-limiting detection
             
         wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.storytext')))
         response = HTML(html=session.page_source)
