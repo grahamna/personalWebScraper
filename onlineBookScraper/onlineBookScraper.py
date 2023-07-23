@@ -1,9 +1,13 @@
+import random
 import sys
 import threading
 import re
 from requests_html import HTMLSession
 from requests_html import HTML
 import undetected_chromedriver as uc
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 
@@ -57,8 +61,8 @@ def fetchBookRR(urlString=None, book=None, session=None):
         if book is None:
             title = response.html.find('title', first=True).text
             title = title.replace(" ", "")
-            title = title.replace("/", "-")
-            book = open(f'book/{title}.txt', 'w')
+            title = title.replace("/", "_")
+            book = open(f'onlineBookScraper/book/{title}.txt', 'w')
 
         book.write(text + '\n')
 
@@ -85,15 +89,26 @@ def fetchBookFF(urlString=None, book=None, session=None):
     tempString = urlString
     try:
         if session is None:
-            session = uc.Chrome(headless=True, use_subprocess=True)
-            session.set_page_load_timeout(15)
-            session.get(urlString.strip())
-            time.sleep(15)
-        else:
+            session = uc.Chrome(headless=False)
+            i = random.random()
+            k = random.randint(1,2) + i*1.22
             session.set_page_load_timeout(10)
+            wait = WebDriverWait(session, 150)
             session.get(urlString.strip())
-
+            wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'iframe')))
+            time.sleep(1.502 + k)
+            session.switch_to.frame(session.find_element(By.CSS_SELECTOR, 'iframe'))
+            time.sleep(.732 + k)
+            session.find_element(By.CSS_SELECTOR, 'input').click()
+            session.switch_to.default_content()
+            time.sleep(4.232 + k)
+        else:
+            session.set_page_load_timeout()
+            session.get(urlString.strip())
+            
+        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.storytext')))
         response = HTML(html=session.page_source)
+        
         content = response.find('div.storytext', first=True)
         text = content.text
         next = response.find('button.btn', containing="Next", first=True)
@@ -106,8 +121,8 @@ def fetchBookFF(urlString=None, book=None, session=None):
         if book is None:
             title = session.title
             title = title.replace(" ", "")
-            title = title.replace("/", "-")
-            book = open(f'book/{title}.txt', 'w')
+            title = title.replace("/", "_")
+            book = open(f'onlineBookScraper/book/{title}.txt', 'w')
 
         book.write(text + '\n')
 
@@ -121,7 +136,7 @@ def fetchBookFF(urlString=None, book=None, session=None):
         print(f"An error occurred: {str(e)}")
         if session is not None:
             session.quit()
-            print("session closed for restart")
+            print("session quit attempt")
         print("Trying Again... press ctrl C to stop")
         fetchBookFF(tempString, book, None)
 
@@ -146,8 +161,8 @@ def fetchBookForum(urlString=None, book=None, session=None, baseUrl=None):
         if book is None:
             title = response.html.find('title', first=True).text
             title = title.replace(" ", "")
-            title = title.replace("/", "-")
-            book = open(f'book/{title}.txt', 'w')
+            title = title.replace("/", "_")
+            book = open(f'onlineBookScraper/book/{title}.txt', 'w')
 
         book.write(text + '\n')
 
@@ -203,8 +218,8 @@ def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None, auth=None
         if book is None:
             title = response.html.find('title', first=True).text
             title = title.replace(" ", "")
-            title = title.replace("/", "-")
-            book = open(f'book/{title}.txt', 'w')
+            title = title.replace("/", "_")
+            book = open(f'onlineBookScraper/book/{title}.txt', 'w')
 
         book.write(text + '\n')
 
@@ -236,8 +251,8 @@ def main():
     
     print("fully set up for royalroad | fanfiction.net is rather buggy, but works. You can manually pass the captcha by changing the uc.Chrome(headless=True, ...) to False, visa versa | forums. sites, ex. forums.spacebattles.com, forums.sufficientvelocity.com | works for sites where you've got login creds and how they're formatted")
     args = sys.argv[1:]
-    # args = ['https://forum.questionablequesting.com/threads/beware-of-chicken-xianxia.13790/reader'] #for debugging, comment out before actual use with CLI
-    # print("Debugging Mode! CLI args not being used!") # debug statement
+    args = ['https://www.fanfiction.net//s/12952720/1/The-Crimson-Sorcerer'] #for debugging, comment out before actual use with CLI
+    print("Debugging Mode! CLI args not being used!") # debug statement
 
     try:
         if len(args) != 0:
