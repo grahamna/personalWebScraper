@@ -92,7 +92,7 @@ def fetchBookFF(urlString=None, book=None, session=None):
             session = uc.Chrome(headless=False)
             i = random.random()
             k = random.randint(1,2) + i*1.22
-            session.set_page_load_timeout(10)
+            session.set_page_load_timeout(15)
             wait = WebDriverWait(session, 150)
             session.get(urlString.strip())
             wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'iframe')))
@@ -103,7 +103,8 @@ def fetchBookFF(urlString=None, book=None, session=None):
             session.switch_to.default_content()
             time.sleep(4.232 + k)
         else:
-            session.set_page_load_timeout()
+            session.set_page_load_timeout(15)
+            wait = WebDriverWait(session, 15)
             session.get(urlString.strip())
             
         wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.storytext')))
