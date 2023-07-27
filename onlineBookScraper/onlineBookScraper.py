@@ -62,6 +62,13 @@ def fetchBookRR(urlString=None, book=None, session=None):
             title = response.html.find('title', first=True).text
             title = title.replace(" ", "")
             title = title.replace("/", "_")
+            title = title.replace("|", "_")
+            title = title.replace(":", "_")
+            title = title.replace("{", "_")
+            title = title.replace("}", "_")
+            title = title.replace("[", "_")
+            title = title.replace("]", "_")
+            title = title.replace("=", "_")
             book = open(f'onlineBookScraper/book/{title}.txt', 'w')
 
         book.write(text + '\n')
@@ -126,6 +133,13 @@ def fetchBookFF(urlString=None, book=None, session=None):
             title = session.title
             title = title.replace(" ", "")
             title = title.replace("/", "_")
+            title = title.replace("|", "_")
+            title = title.replace(":", "_")
+            title = title.replace("{", "_")
+            title = title.replace("}", "_")
+            title = title.replace("[", "_")
+            title = title.replace("]", "_")
+            title = title.replace("=", "_")
             book = open(f'book/{title}.txt', 'w')
 
         book.write(text + '\n')
@@ -162,7 +176,11 @@ def fetchBookForum(urlString=None, book=None, session=None, baseUrl=None):
 
         response = session.get(urlString.strip())
         content = response.html.find('div.bbWrapper')
-        text = ''.join(block.text for block in content[1:])
+        prev =  next = response.html.find('a.pageNav-jump--prev', first=True)
+        if (prev is None):
+            text = ''.join(block.text for block in content[1:])
+        else:
+            text = ''.join(block.text for block in content[0:])
         next = response.html.find('a.pageNav-jump--next', first=True)
         if (next is None) :
             nextUrlString = None
@@ -174,6 +192,13 @@ def fetchBookForum(urlString=None, book=None, session=None, baseUrl=None):
             title = response.html.find('title', first=True).text
             title = title.replace(" ", "")
             title = title.replace("/", "_")
+            title = title.replace("|", "_")
+            title = title.replace(":", "_")
+            title = title.replace("{", "_")
+            title = title.replace("}", "_")
+            title = title.replace("[", "_")
+            title = title.replace("]", "_")
+            title = title.replace("=", "_")
             book = open(f'onlineBookScraper/book/{title}.txt', 'w')
 
         book.write(text + '\n')
@@ -231,6 +256,13 @@ def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None, auth=None
             title = response.html.find('title', first=True).text
             title = title.replace(" ", "")
             title = title.replace("/", "_")
+            title = title.replace("|", "_")
+            title = title.replace(":", "_")
+            title = title.replace("{", "_")
+            title = title.replace("}", "_")
+            title = title.replace("[", "_")
+            title = title.replace("]", "_")
+            title = title.replace("=", "_")
             book = open(f'onlineBookScraper/book/{title}.txt', 'w')
 
         book.write(text + '\n')
@@ -274,8 +306,8 @@ def main():
     
     print("fully set up for royalroad | fanfiction.net is rather buggy, but works. You can manually pass the captcha by changing the uc.Chrome(headless=True, ...) to False, visa versa | forums. sites, ex. forums.spacebattles.com, forums.sufficientvelocity.com | works for sites where you've got login creds and how they're formatted")
     args = sys.argv[1:]
-    args = ['https://www.fanfiction.net//s/12952720/1/The-Crimson-Sorcerer'] #for debugging, comment out before actual use with CLI
-    print("Debugging Mode! CLI args not being used!") # debug statement
+    # args = ['https://www.fanfiction.net//s/12952720/1/The-Crimson-Sorcerer'] #for debugging, comment out before actual use with CLI
+    # print("Debugging Mode! CLI args not being used!") # debug statement
 
     try:
         if len(args) != 0:
