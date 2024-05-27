@@ -2,13 +2,15 @@ import random
 import sys
 import threading
 import re
+import time
+
 from requests_html import HTMLSession
 from requests_html import HTML
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
+
 
 
 def fetchBook(urlString=None, book=None, session=None):
@@ -60,24 +62,15 @@ def fetchBookRR(urlString=None, book=None, session=None):
 
         if book is None:
             title = response.html.find('title', first=True).text
-            title = title.replace(" ", "")
-            title = title.replace("/", "_")
-            title = title.replace("|", "_")
-            title = title.replace(":", "_")
-            title = title.replace("{", "_")
-            title = title.replace("}", "_")
-            title = title.replace("[", "_")
-            title = title.replace("]", "_")
-            title = title.replace("=", "_")
-            book = open(f'onlineBookScraper/book/{title}.txt', 'w')
+            title = trimTitle(title)
+            book = open(f'onlineBookScraper/book/{title}.txt', 'w', encoding='utf-8')
 
         book.write(text + '\n')
-
         print(nextUrlString)
 
         if nextUrlString:
             fetchBookRR(nextUrlString, book, session)
-
+            
     except Exception as e:
         print(f"An error occurred in fetchRoyal: {str(e)}")
         if book:
@@ -131,16 +124,8 @@ def fetchBookFF(urlString=None, book=None, session=None):
 
         if book is None:
             title = session.title
-            title = title.replace(" ", "")
-            title = title.replace("/", "_")
-            title = title.replace("|", "_")
-            title = title.replace(":", "_")
-            title = title.replace("{", "_")
-            title = title.replace("}", "_")
-            title = title.replace("[", "_")
-            title = title.replace("]", "_")
-            title = title.replace("=", "_")
-            book = open(f'book/{title}.txt', 'w')
+            title = trimTitle(title)
+            book = open(f'book/{title}.txt', 'w', encoding='utf-8')
 
         book.write(text + '\n')
 
@@ -190,16 +175,8 @@ def fetchBookForum(urlString=None, book=None, session=None, baseUrl=None):
 
         if book is None:
             title = response.html.find('title', first=True).text
-            title = title.replace(" ", "")
-            title = title.replace("/", "_")
-            title = title.replace("|", "_")
-            title = title.replace(":", "_")
-            title = title.replace("{", "_")
-            title = title.replace("}", "_")
-            title = title.replace("[", "_")
-            title = title.replace("]", "_")
-            title = title.replace("=", "_")
-            book = open(f'onlineBookScraper/book/{title}.txt', 'w')
+            title = trimTitle(title)
+            book = open(f'onlineBookScraper/book/{title}.txt', 'w', encoding='utf-8')
 
         book.write(text + '\n')
 
@@ -254,16 +231,8 @@ def fetchBookQQ(urlString=None, book=None, session=None, baseUrl=None, auth=None
 
         if book is None:
             title = response.html.find('title', first=True).text
-            title = title.replace(" ", "")
-            title = title.replace("/", "_")
-            title = title.replace("|", "_")
-            title = title.replace(":", "_")
-            title = title.replace("{", "_")
-            title = title.replace("}", "_")
-            title = title.replace("[", "_")
-            title = title.replace("]", "_")
-            title = title.replace("=", "_")
-            book = open(f'onlineBookScraper/book/{title}.txt', 'w')
+            title = trimTitle(title)
+            book = open(f'onlineBookScraper/book/{title}.txt', 'w', encoding='utf-8')
 
         book.write(text + '\n')
 
@@ -294,9 +263,21 @@ def solveCaptcha(session, wait):
     session.switch_to.default_content()
     time.sleep(4.232 + k)
 
+def trimTitle(title):
+    title = title.replace(" ", "")
+    title = title.replace("/", "_")
+    title = title.replace("|", "_")
+    title = title.replace(":", "_")
+    title = title.replace("{", "_")
+    title = title.replace("}", "_")
+    title = title.replace("[", "_")
+    title = title.replace("]", "_")
+    title = title.replace("=", "_")
+    return title
+
 def input_loop():
         while True:
-            url = input("Enter a URL (or 'q' to stop listening): ")
+            url = input("Enter a URL (or 'q' to stop listening):\n => ")
             if url.lower() == "q":
                 break
             t = threading.Thread(target=fetchBook, args=(url, None, None))

@@ -1,2 +1,5 @@
+.gitignore
 /*/book/*
 .vscode/*
+/*/Counter/*
+/*/__pycache__/*
