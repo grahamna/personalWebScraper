@@ -29,7 +29,7 @@ def fetchLightNovel(urlString=None, book=None, session=None, baseUrl=None):
         if book is None:
             title = response.html.find('title', first=True).text
             title = trimTitle(title)
-            book = open(f'C:/Users/natea/Downloads/keep/bookScraper/book/{title}.txt', 'w', encoding='utf-8')
+            book = open(f'onlineBookScraper/book/{title}.txt/{title}.txt', 'w', encoding='utf-8')
 
         book.write(text + '\n')
         
